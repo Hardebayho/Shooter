@@ -19,6 +19,7 @@ public:
     float getX() { return x; }
     float getY() { return y; }
     float getRadius() { return radius; }
+    void loseLife() { lives--; }
 
     std::vector<Bullet*> getBullets() { return bullets; }
 	
@@ -29,6 +30,7 @@ private:
 	float dx;
 	float dy;
 	float moveSpeed;
+    int lives;
 	
 	// Movement
 	bool left;

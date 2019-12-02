@@ -69,10 +69,8 @@ int main() {
 				srand(time(NULL));
 				
 				// Initialize all objects here
-                for (int i = 0; i < 8; i++) {
-                    enemies.push_back(new Enemy(2));
-                    enemies.push_back(new Enemy(3));
-                    enemies.push_back(new Enemy(4));
+                for (int i = 0; i < 16; i++) {
+                    enemies.push_back(new Enemy(1));
 				}
 				player.init();
 				
@@ -148,7 +146,7 @@ void update() {
         float playerRadius = player.getRadius();
 
         if (collisionManager.checkCircleCollision(playerX, playerY, playerRadius, enemyX, enemyY, enemyRadius)) {
-            std::cout << "Player hit!" << std::endl;
+            player.loseLife();
             enemy->hit();
         }
     }

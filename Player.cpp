@@ -16,6 +16,7 @@ void Player::init() {
 	firingTimerDiff = 0.2;
 	numBulletsFont = al_create_builtin_font();
     pulseAlpha = 1;
+    lives = 3;
 }
 
 void Player::update() {
@@ -109,6 +110,12 @@ void Player::render() {
 	for (auto& bullet : bullets) {
 		bullet->render();
 	}
+
+    // Draw lives
+    for (int i = 0; i < lives; i++) {
+        al_draw_circle(i * 24 + 20, 60, radius, al_map_rgb_f(0, 1, 0.2), 2);
+        al_draw_filled_circle(i * 24 + 20, 60, radius / 2, al_map_rgba_f(1 * pulseAlpha, 1 * pulseAlpha, 1 * pulseAlpha, pulseAlpha));
+    }
 }
 
 void Player::dispose() {
