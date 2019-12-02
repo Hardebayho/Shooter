@@ -70,7 +70,9 @@ int main() {
 				
 				// Initialize all objects here
                 for (int i = 0; i < 8; i++) {
-                    enemies.push_back(new Enemy(1));
+                    enemies.push_back(new Enemy(2));
+                    enemies.push_back(new Enemy(3));
+                    enemies.push_back(new Enemy(4));
 				}
 				player.init();
 				
@@ -125,10 +127,12 @@ void update() {
             float enemyX = enemy->getX();
             float enemyY = enemy->getY();
             float enemyRadius = enemy->getRadius();
+            if (!enemy->isRecovering())
             if (collisionManager.checkCircleCollision(bullet->getX(), bullet->getY(), bullet->getRadius(), enemyX, enemyY, enemyRadius)) {
                 bullet->kill();
                 enemy->hit();
-                explosions.push_back(new Explosion(enemyX, enemyY, enemyRadius, 0.2, 1));
+                if (enemy->getLives() <= 0)
+                    explosions.push_back(new Explosion(enemyX, enemyY, enemyRadius, 0.2, 1));
             }
         }
     }

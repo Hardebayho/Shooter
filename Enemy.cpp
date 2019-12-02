@@ -47,6 +47,10 @@ void Enemy::init() {
 	dy = sin(angle) * speed;
 	ready = false;
     pulseAlpha = 1;
+    hitColor = al_color_name("white");
+    hitTimer = 0;
+    hitTimerDiff = 2;
+    recovering = false;
 }
 
 void Enemy::update() {
@@ -54,6 +58,14 @@ void Enemy::update() {
 	if (!ready) {
         if (x > 0 && x < DISPLAY_WIDTH - radius && y > 0 && y < DISPLAY_HEIGHT - radius) ready = true;
 	}
+
+    // Enemy got hit
+    if (hitTimer > 0 && recovering) {
+        if (al_get_time() - hitTimer >= hitTimerDiff) {
+            hitTimer = 0;
+            recovering = false;
+        }
+    }
 
 	x += dx;
 	y += dy;
@@ -69,8 +81,14 @@ void Enemy::update() {
 }
 
 void Enemy::render() {
-	al_draw_circle(x, y, radius, color, 2);
-    al_draw_filled_circle(x, y, radius / 2, al_map_rgba_f(1 * pulseAlpha, 1 * pulseAlpha, 0 * pulseAlpha, pulseAlpha));
+
+    if (recovering) {
+        al_draw_circle(x, y, radius, hitColor, 2);
+        al_draw_filled_circle(x, y, radius / 2, hitColor);
+    } else {
+        al_draw_circle(x, y, radius, color, 2);
+        al_draw_filled_circle(x, y, radius / 2, al_map_rgba_f(1 * pulseAlpha, 1 * pulseAlpha, 0 * pulseAlpha, pulseAlpha));
+    }
 }
 
 void Enemy::dispose() {
