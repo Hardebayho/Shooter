@@ -2,6 +2,7 @@
 #include <math.h>
 #include <allegro5/allegro_primitives.h>
 #include "Constants.h"
+#include <iostream>
 
 Enemy::Enemy(int star_) : star(star_) {
 	init();
@@ -40,11 +41,17 @@ void Enemy::init() {
 			color = al_map_rgb_f(0.4, 0.6, 0.3);
 		break;
 	}
-	x = DISPLAY_WIDTH;
-	y = rand() % (DISPLAY_HEIGHT - (int)radius);
+    x = DISPLAY_WIDTH - radius;
+    y = abs(rand() % (DISPLAY_HEIGHT - (int)radius));
+    std::cout << "----------------------------------------" << std::endl;
+    std::cout << "An enemy's x: " << x << std::endl;
+    std::cout << "An enemy's y: " << y << std::endl;
 	float angle = (rand() % 140 + 29) * 3.1415 / 180;
 	dx = -abs(cos(angle) * speed);
 	dy = sin(angle) * speed;
+    std::cout << "An enemy's dx: " << dx << std::endl;
+    std::cout << "An enemy's dy: " << dy << std::endl;
+    std::cout << "----------------------------------------" << std::endl;
 	ready = false;
     pulseAlpha = 1;
     hitColor = al_color_name("white");
@@ -56,7 +63,7 @@ void Enemy::init() {
 void Enemy::update() {
 	
 	if (!ready) {
-        if (x > 0 && x < DISPLAY_WIDTH - radius && y > 0 && y < DISPLAY_HEIGHT - radius) ready = true;
+        if (x > 0 && x < DISPLAY_WIDTH - radius) ready = true;
 	}
 
     // Enemy got hit
@@ -70,7 +77,7 @@ void Enemy::update() {
 	x += dx;
 	y += dy;
 
-    pulseAlpha -= 0.026;
+    pulseAlpha -= 0.03;
     if (pulseAlpha < 0) pulseAlpha = 1;
 	
 	if (ready) {

@@ -22,12 +22,24 @@ ALLEGRO_DISPLAY* display = nullptr;
 ALLEGRO_EVENT_QUEUE* event_queue = nullptr;
 ALLEGRO_TIMER* timer = nullptr;
 
+ALLEGRO_FONT *gameFont = nullptr;
+
 Player player;
 
 std::vector<Enemy*> enemies;
 CollisionManager collisionManager;
 
 std::vector<Explosion*> explosions;
+
+// Level information.
+
+int level;
+int levelProgress;
+int maxLevelProgress;
+float levelProgressAlpha;
+bool levelStart;
+
+// End level information
 
 int main() {
 
@@ -68,10 +80,14 @@ int main() {
 				
 				srand(time(NULL));
 				
-				// Initialize all objects here
-                for (int i = 0; i < 16; i++) {
-                    enemies.push_back(new Enemy(1));
-				}
+                level = 0;
+                levelProgress = 1;
+                maxLevelProgress = 4;
+                levelProgressAlpha = 1;
+                levelStart = false;
+
+                gameFont = al_create_builtin_font();
+
 				player.init();
 				
 				al_start_timer(timer);
@@ -107,11 +123,107 @@ int main() {
 void update() {
     // Update player
 	player.update();
+
+    // Let's know if we need to put enemies on the screen
+    if (enemies.size() <= 0) {
+        if (level <= 0 || levelProgress >= maxLevelProgress) {
+            level++;
+            levelProgress = 1;
+            levelStart = false;
+        } else if (levelProgress < maxLevelProgress && levelStart) {
+            levelProgress++;
+            levelStart = false;
+        }
+    }
+
+    // If we're still drawing our text to the screen,
+    // Make sure to update the levelProgressAlpha variable
+    if (!levelStart) {
+        levelProgressAlpha -= 0.005;
+        if (levelProgressAlpha <= 0) {
+            levelProgressAlpha = 1;
+            levelStart = true;
+        }
+    }
+
+    if (enemies.size() <= 0 && levelStart) {
+        switch (level) {
+            case 1:
+                switch (levelProgress) {
+                    case 1:
+                        for (int i = 0; i < 8; i++) {
+                            enemies.push_back(new Enemy(1));
+                        }
+                    break;
+                    case 2:
+                        for (int i = 0; i < 12; i++) {
+                            enemies.push_back(new Enemy(1));
+                        }
+                        for (int i = 0; i < 2; i++) {
+                            enemies.push_back(new Enemy(2));
+                        }
+                    break;
+                    case 3:
+                        for (int i = 0; i < 10; i++) {
+                            enemies.push_back(new Enemy(1));
+                        }
+                        for (int i = 0; i < 4; i++) {
+                            enemies.push_back(new Enemy(2));
+                        }
+                    break;
+                    case 4:
+                        for (int i = 0; i < 5; i++) {
+                            enemies.push_back(new Enemy(1));
+                        }
+                        for (int i = 0; i < 5; i++) {
+                            enemies.push_back(new Enemy(2));
+                        }
+                    break;
+                }
+            break;
+            case 2:
+                switch (levelProgress) {
+                    case 1:
+                    break;
+                    case 2:
+                    break;
+                    case 3:
+                    break;
+                    case 4:
+                    break;
+                }
+            break;
+            case 3:
+                switch (levelProgress) {
+                    case 1:
+                    break;
+                    case 2:
+                    break;
+                    case 3:
+                    break;
+                    case 4:
+                    break;
+                }
+            break;
+            case 4:
+                switch (levelProgress) {
+                    case 1:
+                    break;
+                    case 2:
+                    break;
+                    case 3:
+                    break;
+                    case 4:
+                    break;
+                }
+            break;
+        }
+    }
 	
     // Update enemy
 	for (auto& enemy : enemies) {
 		enemy->update();
-	}
+    }
 
     // update explosions
     for (auto& explosion : explosions) {
@@ -172,10 +284,20 @@ void update() {
 }
 
 void render() {
+
     al_clear_to_color(al_map_rgb_f(0, 0, 0));
 	
 	// Render all stuff here...
+    if (!levelStart) {
+        al_draw_textf(gameFont, al_map_rgba_f(1 * levelProgressAlpha, 1 * levelProgressAlpha, 1 * levelProgressAlpha, levelProgressAlpha), DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2, ALLEGRO_ALIGN_CENTER, " - LEVEL %i : %i -", level, levelProgress);
+    }
+
+
 	player.render();
+
+    if (levelProgress >= maxLevelProgress) {
+        // Display the level progress info
+    }
 	
 	for (auto& enemy : enemies) {
 		enemy->render();
@@ -184,6 +306,8 @@ void render() {
     for (auto& explosion : explosions) {
         explosion->render();
     }
+
+    al_draw_textf(gameFont, al_map_rgb_f(1, 1, 1), DISPLAY_WIDTH - 120, 20, 0, "Enemies: %i", enemies.size());
 	
 	al_flip_display();
 }
@@ -194,20 +318,23 @@ void handleInput() {
 
 void dispose() {
 
+    // Dispose of player resources
 	player.dispose();
 	
+    // Remove and delete all enemies
 	for (auto& enemy : enemies) {
 		enemy->dispose();
 		delete enemy;
 	}
-	
 	enemies.clear();
 
+    // Remove and delete all the explosions
     for (auto& explosion : explosions) {
         explosion->dispose();
         delete explosion;
     }
 
+    // Destroy allegro objects.
 	al_destroy_display(display);
 	al_destroy_event_queue(event_queue);
 	al_destroy_timer(timer);
