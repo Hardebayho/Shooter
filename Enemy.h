@@ -1,24 +1,27 @@
 #pragma once
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_color.h>
+#include <allegro5/allegro_audio.h>
+#include <allegro5/allegro_acodec.h>
+
+#include "Bullet.h"
+#include <vector>
 
 class Enemy {
 public:
 	Enemy(int star_);
 	void init();
-	void update();
+    void update(float playerX, float playerY);
 	void render();
 	void dispose();
 
     float getX() { return x; }
     float getY() { return y; }
     float getRadius() { return radius; }
-    void hit() {
-        lives--;
-        hitTimer = al_get_time();
-        recovering = true;
-    }
+    void hit();
     int getLives() { return lives; }
+
+    std::vector<Bullet*> getBullets() { return bullets; }
 
     bool isRecovering() { return recovering; }
 
@@ -39,4 +42,10 @@ private:
     float hitTimer;
     float hitTimerDiff;
     bool recovering;
+
+    ALLEGRO_SAMPLE* hitSound;
+    ALLEGRO_SAMPLE_ID hitSoundID;
+
+    std::vector<Bullet*> bullets;
+
 };

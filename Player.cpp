@@ -1,5 +1,7 @@
 #include "Player.h"
 #include "Constants.h"
+#include <iostream>
+#include <allegro5/allegro_color.h>
 
 Player::Player() {}
 
@@ -17,6 +19,13 @@ void Player::init() {
 	numBulletsFont = al_create_builtin_font();
     pulseAlpha = 1;
     lives = 3;
+
+    shootSound = al_load_sample("res/sounds/player_shoot.wav");
+    hitSound = al_load_sample("res/sounds/player_hit.wav");
+    hitColor = al_color_name("white");
+    hitTimer = 0;
+    hitTimerDiff = 2;
+    recovering = false;
 }
 
 void Player::update() {
@@ -36,6 +45,14 @@ void Player::update() {
 		dy = 0;
 	}
 
+    // Check if we've finished recovering
+    if (hitTimer > 0 && recovering) {
+        if (al_get_time() - hitTimer >= hitTimerDiff) {
+            hitTimer = 0;
+            recovering = false;
+        }
+    }
+
     // Check for objects to remove
     // Bullets
     for (std::vector<Bullet*>::iterator iter = bullets.begin(); iter != bullets.end(); ++iter) {
@@ -50,6 +67,7 @@ void Player::update() {
 	if (firing) {
 		if (al_get_time() - firingTimer >= firingTimerDiff) {
 			bullets.push_back(new Bullet(x, y));
+            al_play_sample(shootSound, 0.4, 0, 1, ALLEGRO_PLAYMODE_ONCE, &shootID);
 			firingTimer = al_get_time();
 		}
 	}
@@ -102,8 +120,14 @@ void Player::handleInput() {
 }
 
 void Player::render() {
-	al_draw_circle(x, y, radius, al_map_rgb_f(0, 1, 0.2), 2);
-    al_draw_filled_circle(x, y, radius / 2, al_map_rgba_f(1 * pulseAlpha, 1 * pulseAlpha, 1 * pulseAlpha, pulseAlpha));
+
+    if (recovering) {
+        al_draw_circle(x, y, radius, hitColor, 2);
+        al_draw_filled_circle(x, y, radius / 2, hitColor);
+    } else {
+        al_draw_circle(x, y, radius, al_map_rgb_f(0, 1, 0.2), 2);
+        al_draw_filled_circle(x, y, radius / 2, al_map_rgba_f(1 * pulseAlpha, 1 * pulseAlpha, 1 * pulseAlpha, pulseAlpha));
+    }
 	
     al_draw_textf(numBulletsFont, al_map_rgb_f(1, 1, 1), 10, 10, 0, "Num Bullets: %i", (int)bullets.size());
 	
@@ -118,7 +142,19 @@ void Player::render() {
     }
 }
 
+void Player::loseLife() {
+    lives--;
+    if (lives > 0) {
+        al_play_sample(hitSound, 0.4, 0, 1, ALLEGRO_PLAYMODE_ONCE, &hitSoundID);
+    }
+
+    recovering = true;
+    hitTimer = al_get_time();
+}
+
 void Player::dispose() {
+    al_destroy_sample(shootSound);
+    al_destroy_sample(hitSound);
 	for (auto& bullet : bullets) {
 		bullet->dispose();
 		delete bullet;

@@ -5,11 +5,12 @@
 #include "Bullet.h"
 #include <vector>
 #include <allegro5/allegro_font.h>
+#include <allegro5/allegro_audio.h>
 
 class Player {
 
 public:
-	Player();
+    Player();
 	void init();
 	void update();
 	void handleInput();
@@ -19,9 +20,14 @@ public:
     float getX() { return x; }
     float getY() { return y; }
     float getRadius() { return radius; }
-    void loseLife() { lives--; }
+    void loseLife();
+
+    int getLives() { return lives; }
+    void setLives(int lives_) { lives = lives_; }
 
     std::vector<Bullet*> getBullets() { return bullets; }
+
+    bool isRecovering() { return recovering; }
 	
 private:
 	float x;
@@ -48,6 +54,16 @@ private:
 	ALLEGRO_FONT* numBulletsFont;
 
     float pulseAlpha;
+
+    ALLEGRO_SAMPLE* shootSound;
+    ALLEGRO_SAMPLE_ID shootID;
+    ALLEGRO_SAMPLE* hitSound;
+    ALLEGRO_SAMPLE_ID hitSoundID;
+
+    ALLEGRO_COLOR hitColor;
+    float hitTimer;
+    float hitTimerDiff;
+    bool recovering;
 
 };
 
